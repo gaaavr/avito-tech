@@ -7,7 +7,7 @@ import (
 
 // User - Interface describing the user entity
 type User interface {
-	AccrualFunds(ac models.AccrualCash) (code int, err error)
+	AccrualFunds(ac models.AccrualCash) error
 }
 
 // Repository - object responsible for the work of logic with the database
