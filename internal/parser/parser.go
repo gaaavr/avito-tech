@@ -3,6 +3,7 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/valyala/fasthttp"
 )
@@ -27,7 +28,7 @@ func (p *Parser) UnmarshalBody(ctx *fasthttp.RequestCtx, data interface{}, valid
 	}
 	if validate {
 		if err := p.validator.Struct(data); err != nil {
-			return err
+			return fmt.Errorf("invalid data for request: %s", err.Error())
 		}
 	}
 	return nil

@@ -8,6 +8,8 @@ import (
 // User - Interface describing the user entity
 type User interface {
 	AccrualFunds(ac models.AccrualCash) (code int, err error)
+	GetBalance(ub *models.UserBalance) (code int, err error)
+	BlockFunds(order models.Order) (code int, err error)
 }
 
 // Service - object responsible for the operation of the internal logic

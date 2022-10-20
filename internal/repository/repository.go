@@ -8,16 +8,24 @@ import (
 // User - Interface describing the user entity
 type User interface {
 	AccrualFunds(ac models.AccrualCash) error
+	GetBalance(ub *models.UserBalance) (*models.UserBalance, error)
+	BlockFunds(order models.Order) error
+}
+
+// Transaction - interface describing the transaction object
+type Transaction interface {
 }
 
 // Repository - object responsible for the work of logic with the database
 type Repository struct {
 	User
+	Transaction
 }
 
 // NewRepository - constructor function for Repository
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
-		User: NewUserRepo(db),
+		User:        NewUserRepo(db),
+		Transaction: NewTransactionRepo(db),
 	}
 }
