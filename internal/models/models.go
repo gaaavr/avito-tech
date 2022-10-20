@@ -23,7 +23,7 @@ type Transaction struct {
 	Message string    `json:"message"`
 }
 
-// Order - structure for order
+// Order - an object for reserving funds when creating an order and debiting these funds
 type Order struct {
 	OrderID   int       `json:"order_id" validate:"gte=1"`
 	UserID    int       `json:"id" validate:"gte=1"`

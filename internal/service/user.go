@@ -13,6 +13,7 @@ var (
 	errUser    = errors.New("user id must not be less than 1")
 	errService = errors.New("service id must not be less than 1")
 	errOrder   = errors.New("order id must not be less than 1")
+	errNoRows  = "no rows in result set"
 )
 
 // UserService - user object in the service layer
@@ -61,7 +62,7 @@ func (u *UserService) BlockFunds(order models.Order) (code int, err error) {
 	order.Block = true
 	err = u.repo.BlockFunds(order)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if err.Error() == errNoRows {
 			return 400, fmt.Errorf("user with id %d does not exist", order.UserID)
 		}
 		return 500, fmt.Errorf("database error: %s", err.Error())
@@ -76,7 +77,7 @@ func (u *UserService) GetBalance(ub *models.UserBalance) (code int, err error) {
 	}
 	ub, err = u.repo.GetBalance(ub)
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if err.Error() == errNoRows {
 			return 400, fmt.Errorf("user with id %d does not exist", ub.ID)
 		}
 		return 500, fmt.Errorf("database error: %s", err.Error())

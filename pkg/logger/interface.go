@@ -11,4 +11,5 @@ type Logger interface {
 	Debugf(format string, args ...interface{})
 	Debug(args ...interface{})
 	Panicf(format string, args ...interface{})
+	Printf(format string, args ...interface{})
 }

@@ -59,3 +59,28 @@ func (a *App) blockFunds(ctx *fasthttp.RequestCtx) {
 	message := fmt.Sprintf("order %d successfully created, funds reserved", order.OrderID)
 	Response(ctx, statusCode, message, true)
 }
+
+// chargeFunds - method for charging previously reserved funds
+func (a *App) chargeFunds(ctx *fasthttp.RequestCtx) {
+	var order models.Order
+	if err := a.parser.UnmarshalBody(ctx, &order, true); err != nil {
+		a.logger.Errorf("data parsing error: %s", err.Error())
+		Response(ctx, 500, err.Error(), false)
+		return
+	}
+	statusCode, err := a.services.ChargeFunds(order)
+	if err != nil {
+		a.logger.Errorf("charge funds error: %s", err.Error())
+		Response(ctx, statusCode, err.Error(), false)
+		return
+	}
+	message := fmt.Sprintf("funds for the order %d have been successfully charged", order.OrderID)
+	Response(ctx, statusCode, message, true)
+}
+
+// getReport - method provides monthly accounting report
+func (a *App) getReport(ctx *fasthttp.RequestCtx) {
+	data := []byte("тест1;тест2\n")
+	ctx.SetContentType("applifdscation/CSV")
+	ctx.Write(data)
+}

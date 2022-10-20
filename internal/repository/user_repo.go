@@ -17,7 +17,6 @@ const (
 	columnAmount      = "amount"
 	columnDate        = "date_time"
 	columnMessage     = "message"
-	tableOrders       = "orders"
 )
 
 var (

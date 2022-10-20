@@ -12,14 +12,21 @@ type User interface {
 	BlockFunds(order models.Order) (code int, err error)
 }
 
+// Order - Interface describing the order entity
+type Order interface {
+	ChargeFunds(order models.Order) (code int, err error)
+}
+
 // Service - object responsible for the operation of the internal logic
 type Service struct {
 	User
+	Order
 }
 
 // NewService - constructor function for Service
 func NewService(repository *repository.Repository) *Service {
 	return &Service{
-		User: NewUserService(repository.User),
+		User:  NewUserService(repository.User),
+		Order: NewOrderService(repository.Order),
 	}
 }

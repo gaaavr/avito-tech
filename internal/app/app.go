@@ -16,7 +16,7 @@ type App struct {
 	defaultServer *fasthttp.Server
 	services      *service.Service
 	parser        *parser.Parser
-	logger        *logger.Log
+	logger        logger.Logger
 }
 
 // New - constructor function for App
@@ -35,6 +35,7 @@ func (a *App) Routing() *router.Router {
 	router.POST("/accrual_funds", a.LogRequests(a.accrualFunds))
 	router.POST("/get_balance", a.LogRequests(a.getBalance))
 	router.POST("/create_order", a.LogRequests(a.blockFunds))
+	router.POST("/charge_funds", a.LogRequests(a.chargeFunds))
 	return router
 }
 
@@ -42,7 +43,7 @@ func (a *App) Run() {
 	router := a.Routing()
 
 	a.defaultServer.Handler = router.Handler
-	a.logger.Logger.Info("start service")
+	a.logger.Info("start service")
 	osSignals := make(chan os.Signal, 1)
 	go func() {
 		err := a.defaultServer.ListenAndServe(fmt.Sprintf("%s:%d", "localhost", 8080))

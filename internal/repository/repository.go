@@ -16,10 +16,16 @@ type User interface {
 type Transaction interface {
 }
 
+// Order - interface describing the Order object
+type Order interface {
+	ChargeFunds(order models.Order) error
+}
+
 // Repository - object responsible for the work of logic with the database
 type Repository struct {
 	User
 	Transaction
+	Order
 }
 
 // NewRepository - constructor function for Repository
@@ -27,5 +33,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		User:        NewUserRepo(db),
 		Transaction: NewTransactionRepo(db),
+		Order:       NewOrdersRepo(db),
 	}
 }
