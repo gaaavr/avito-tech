@@ -41,21 +41,21 @@ func (u *UserRepo) AccrualFunds(ac models.AccrualCash) error {
 	}
 	updateUserBalance := fmt.Sprintf("UPDATE %s SET %s=%s+$1 WHERE %s=$2",
 		tableUsers, columnBalance, columnBalance, columnUserId)
-	result, err := tx.Exec(context.Background(), updateUserBalance, ac.Amount, ac.ID)
+	result, err := tx.Exec(context.Background(), updateUserBalance, ac.Amount, ac.UserID)
 	if err != nil {
 		tx.Rollback(context.Background())
 		return err
 	}
 	rowsAffected := result.RowsAffected()
 	if rowsAffected == 0 {
-		err = u.insertUser(ac)
+		err = u.addUser(ac)
 		if err != nil {
 			tx.Rollback(context.Background())
 			return err
 		}
 	}
 	t := models.Transaction{
-		UserID:  ac.ID,
+		UserID:  ac.UserID,
 		Amount:  ac.Amount,
 		Date:    time.Now().Truncate(time.Second),
 		Message: ac.Message,
@@ -102,16 +102,12 @@ func (u *UserRepo) BlockFunds(order models.Order) error {
 	rowsAffected = result.RowsAffected()
 	if rowsAffected == 0 {
 		tx.Rollback(context.Background())
-		return fmt.Errorf("user with id %d does not exist", order.UserID)
-	}
-	if rowsAffected == 0 {
-		tx.Rollback(context.Background())
 		return errInsertRow
 	}
 
 	t := models.Transaction{
 		UserID:  order.UserID,
-		Amount:  order.Amount,
+		Amount:  -order.Amount,
 		Date:    order.Date,
 		Message: "service payment",
 	}
@@ -132,13 +128,127 @@ func (u *UserRepo) BlockFunds(order models.Order) error {
 func (u *UserRepo) GetBalance(ub *models.UserBalance) (*models.UserBalance, error) {
 	updateUserBalance := fmt.Sprintf("SELECT %s FROM %s WHERE %s=$1",
 		columnBalance, tableUsers, columnUserId)
-	row := u.db.QueryRow(context.Background(), updateUserBalance, ub.ID)
+	row := u.db.QueryRow(context.Background(), updateUserBalance, ub.UserID)
 	err := row.Scan(&ub.Balance)
 	if err != nil {
 		return ub, err
 	}
-
 	return ub, nil
+}
+
+// TransferFunds - method for transferring funds between users
+func (u *UserRepo) TransferFunds(t models.Transfer) error {
+	tx, err := u.db.Begin(context.Background())
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	updateSenderBalance := fmt.Sprintf("UPDATE %s SET %s=%s-$1 WHERE %s=$2",
+		tableUsers, columnBalance, columnBalance, columnUserId)
+	result, err := tx.Exec(context.Background(), updateSenderBalance, t.Amount, t.SenderID)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		tx.Rollback(context.Background())
+		return fmt.Errorf("user with id %d does not exist", t.SenderID)
+	}
+	tr := models.Transaction{
+		UserID:  t.SenderID,
+		Amount:  -t.Amount,
+		Date:    time.Now().Truncate(time.Second),
+		Message: fmt.Sprintf("outgoing transfer to the user %d", t.ReceiverID),
+	}
+	err = u.addTransaction(tr)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	updateReceiverBalance := fmt.Sprintf("UPDATE %s SET %s=%s+$1 WHERE %s=$2",
+		tableUsers, columnBalance, columnBalance, columnUserId)
+	result, err = tx.Exec(context.Background(), updateReceiverBalance, t.Amount, t.ReceiverID)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	rowsAffected = result.RowsAffected()
+	if rowsAffected == 0 {
+		tx.Rollback(context.Background())
+		return fmt.Errorf("user with id %d does not exist", t.ReceiverID)
+	}
+	tr = models.Transaction{
+		UserID:  t.ReceiverID,
+		Amount:  t.Amount,
+		Date:    time.Now().Truncate(time.Second),
+		Message: fmt.Sprintf("incoming transfer from user %d", t.SenderID),
+	}
+	err = u.addTransaction(tr)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	err = tx.Commit(context.Background())
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	return nil
+}
+
+// UnblockFunds - method of reserving money if it was not possible to apply the service
+func (u *UserRepo) UnblockFunds(unblock models.Unblock) error {
+	tx, err := u.db.Begin(context.Background())
+	if err != nil {
+		return err
+	}
+	getAmount := fmt.Sprintf("SELECT %s, %s FROM %s WHERE %s=$1",
+		columnAmount, columnUserId, tableOrders, columnOrderId)
+	row := tx.QueryRow(context.Background(), getAmount, unblock.OrderID)
+	err = row.Scan(&unblock.Amount, &unblock.UserID)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	updateUserBalance := fmt.Sprintf("UPDATE %s SET %s=%s+$1 WHERE %s=$2",
+		tableUsers, columnBalance, columnBalance, columnUserId)
+	result, err := tx.Exec(context.Background(), updateUserBalance, unblock.Amount, unblock.UserID)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		tx.Rollback(context.Background())
+		return fmt.Errorf("user with id %d does not exist", unblock.UserID)
+	}
+
+	updateOrderStatus := fmt.Sprintf("UPDATE %s SET %s=$1,%s=$2 WHERE %s=$3",
+		tableOrders, columnAmount, columnBlock, columnOrderId)
+	result, err = tx.Exec(context.Background(), updateOrderStatus, 0, false, unblock.OrderID)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	t := models.Transaction{
+		UserID:  unblock.UserID,
+		Amount:  unblock.Amount,
+		Date:    time.Now().Truncate(time.Second),
+		Message: "cancellation of service payment",
+	}
+	err = u.addTransaction(t)
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	err = tx.Commit(context.Background())
+	if err != nil {
+		tx.Rollback(context.Background())
+		return err
+	}
+	return nil
 }
 
 // addTransaction - adds information about the new transaction to the database
@@ -169,8 +279,8 @@ func (u *UserRepo) addTransaction(t models.Transaction) error {
 	return nil
 }
 
-// insertUser - method for inserting a new user with replenished balance
-func (u *UserRepo) insertUser(ac models.AccrualCash) error {
+// addUser - method for inserting a new user with replenished balance
+func (u *UserRepo) addUser(ac models.AccrualCash) error {
 	tx, err := u.db.Begin(context.Background())
 	if err != nil {
 		tx.Rollback(context.Background())
@@ -178,7 +288,7 @@ func (u *UserRepo) insertUser(ac models.AccrualCash) error {
 	}
 	insertUser := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES ($1, $2)",
 		tableUsers, columnUserId, columnBalance)
-	result, err := tx.Exec(context.Background(), insertUser, ac.ID, ac.Amount)
+	result, err := tx.Exec(context.Background(), insertUser, ac.UserID, ac.Amount)
 	if err != nil {
 		tx.Rollback(context.Background())
 		return err

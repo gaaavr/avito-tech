@@ -10,15 +10,19 @@ type User interface {
 	AccrualFunds(ac models.AccrualCash) error
 	GetBalance(ub *models.UserBalance) (*models.UserBalance, error)
 	BlockFunds(order models.Order) error
+	TransferFunds(t models.Transfer) error
+	UnblockFunds(unblock models.Unblock) error
 }
 
 // Transaction - interface describing the transaction object
 type Transaction interface {
+	GetUserTransactions(t models.TransactionListRequest) ([]models.TransactionList, error)
 }
 
 // Order - interface describing the Order object
 type Order interface {
 	ChargeFunds(order models.Order) error
+	GetReport(report *models.Report) error
 }
 
 // Repository - object responsible for the work of logic with the database

@@ -13,6 +13,6 @@ type ConfigDB struct {
 	DbPort     int    `env:"DB_PORT" envDefault:"5432"`
 	DbName     string `env:"DB_NAME" envDefault:"postgres"`
 	DbUsername string `env:"DB_USERNAME" envDefault:"postgres"`
-	DbPassword string `env:"DB_PASSWORD,required"`
+	DbPassword string `env:"DB_PASSWORD"`
 	DbSslmode  string `env:"DB_SSLMODE" envDefault:"disable"`
 }

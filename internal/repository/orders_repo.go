@@ -39,3 +39,26 @@ func (o *OrdersRepo) ChargeFunds(order models.Order) error {
 	}
 	return nil
 }
+
+// GetReport - method for providing a summary report for accounting
+func (o *OrdersRepo) GetReport(report *models.Report) error {
+	getReport := fmt.Sprintf("SELECT %s, sum(%s) FROM %s  WHERE DATE_PART('year',%s)=$1 AND DATE_PART('month',%s)=$2 AND %s<>$3 GROUP BY %s",
+		columnServiceId, columnAmount, tableOrders, columnDate, columnDate, columnAmount, columnServiceId)
+	rows, err := o.db.Query(context.Background(), getReport, report.Year, report.Month, 0)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	var (
+		serviceID int
+		amount    float64
+	)
+	for rows.Next() {
+		err = rows.Scan(&serviceID, &amount)
+		if err != nil {
+			return err
+		}
+		report.Data[serviceID] = amount
+	}
+	return nil
+}

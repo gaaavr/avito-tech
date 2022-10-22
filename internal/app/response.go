@@ -16,6 +16,7 @@ func Response(ctx *fasthttp.RequestCtx, statusCode int, description string, stat
 	encoder := json.NewEncoder(ctx)
 	encoder.SetIndent("", "\t")
 	ctx.Response.SetStatusCode(statusCode)
+	ctx.SetContentType("application/json")
 	err := encoder.Encode(response{
 		Success:     status,
 		Description: description,

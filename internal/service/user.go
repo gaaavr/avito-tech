@@ -33,7 +33,7 @@ func (u *UserService) AccrualFunds(ac models.AccrualCash) (code int, err error) 
 	if ac.Amount <= 0 {
 		return 400, errAmount
 	}
-	if ac.ID < 1 {
+	if ac.UserID < 1 {
 		return 400, errUser
 	}
 	ac.Message = "replenishment of the balance"
@@ -67,21 +67,48 @@ func (u *UserService) BlockFunds(order models.Order) (code int, err error) {
 		}
 		return 500, fmt.Errorf("database error: %s", err.Error())
 	}
+	return 201, nil
+}
+
+// UnblockFunds - method of reserving money if it was not possible to apply the service
+func (u *UserService) UnblockFunds(unblock models.Unblock) (code int, err error) {
+	if unblock.OrderID < 1 {
+		return 400, errOrder
+	}
+	err = u.repo.UnblockFunds(unblock)
+	if err != nil {
+		return 500, fmt.Errorf("database error: %s", err.Error())
+	}
 	return 200, nil
 }
 
 // GetBalance - method to get user balance
 func (u *UserService) GetBalance(ub *models.UserBalance) (code int, err error) {
-	if ub.ID < 1 {
+	if ub.UserID < 1 {
 		return 400, errUser
 	}
 	ub, err = u.repo.GetBalance(ub)
 	if err != nil {
 		if err.Error() == errNoRows {
-			return 400, fmt.Errorf("user with id %d does not exist", ub.ID)
+			return 400, fmt.Errorf("user with id %d does not exist", ub.UserID)
 		}
 		return 500, fmt.Errorf("database error: %s", err.Error())
 	}
 
+	return 200, nil
+}
+
+// TransferFunds - method for transferring funds between users
+func (u *UserService) TransferFunds(t models.Transfer) (code int, err error) {
+	if t.SenderID < 1 || t.ReceiverID < 1 {
+		return 400, errUser
+	}
+	if t.Amount <= 0 {
+		return 400, errAmount
+	}
+	err = u.repo.TransferFunds(t)
+	if err != nil {
+		return 500, fmt.Errorf("database error: %s", err.Error())
+	}
 	return 200, nil
 }
