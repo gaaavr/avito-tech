@@ -1,6 +1,10 @@
 package app
 
-import "github.com/fasthttp/router"
+import (
+	"github.com/fasthttp/router"
+	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/valyala/fasthttp/fasthttpadaptor"
+)
 
 // Routing - method for registering all handlers in the router
 func (a *App) Routing() *router.Router {
@@ -14,5 +18,6 @@ func (a *App) Routing() *router.Router {
 	router.POST("/transfer", a.LogRequests(a.transferFunds))
 	router.POST("/transactions", a.LogRequests(a.getUserTransactions))
 	router.POST("/cancel_order", a.LogRequests(a.unblockFunds))
+	router.GET("/docs/{filepath:*}", fasthttpadaptor.NewFastHTTPHandlerFunc(httpSwagger.WrapHandler))
 	return router
 }

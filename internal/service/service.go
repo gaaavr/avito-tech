@@ -1,3 +1,4 @@
+// Package service is responsible for business logic, contains all the abstractions needed on this layer
 package service
 
 import (
@@ -7,7 +8,7 @@ import (
 
 // User - Interface describing the user entity
 type User interface {
-	AccrualFunds(ac models.AccrualCash) (code int, err error)
+	AccrualFunds(ac models.AccrualFunds) (code int, err error)
 	GetBalance(ub *models.UserBalance) (code int, err error)
 	BlockFunds(order models.Order) (code int, err error)
 	TransferFunds(t models.Transfer) (code int, err error)

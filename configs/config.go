@@ -1,3 +1,4 @@
+// Package configs contains the configuration for launching all application components
 package configs
 
 // Common - common config

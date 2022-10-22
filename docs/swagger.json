@@ -1,0 +1,568 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API Server for working with user balance",
+        "title": "Avito-tech",
+        "contact": {
+            "name": "Sergey Gavrilin",
+            "email": "ssg0808@yandex.ru"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/accrual": {
+            "post": {
+                "description": "accepts amount and user ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Accrues funds to the user's balance",
+                "operationId": "accrual-funds",
+                "parameters": [
+                    {
+                        "description": "data for accrual",
+                        "name": "id_and_amount",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AccrualFunds"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/cancel_order": {
+            "post": {
+                "description": "accepts order id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Unblocks the user's funds when the service is canceled",
+                "operationId": "unblock-funds",
+                "parameters": [
+                    {
+                        "description": "order id for unblock",
+                        "name": "unblock_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Unblock"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/charge": {
+            "post": {
+                "description": "accepts user id, service id, order id, amount",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "Withdraws previously blocked funds",
+                "operationId": "charge-funds",
+                "parameters": [
+                    {
+                        "description": "data for charge funds",
+                        "name": "charge_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/create_order": {
+            "post": {
+                "description": "accepts user id, service id, order id, amount",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Blocks user funds when ordering a service",
+                "operationId": "block-funds",
+                "parameters": [
+                    {
+                        "description": "data for order",
+                        "name": "block_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/get_balance": {
+            "post": {
+                "description": "accepts user id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Returns the user's current balance",
+                "operationId": "get-balance",
+                "parameters": [
+                    {
+                        "description": "user id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserBalance"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/get_report": {
+            "post": {
+                "description": "accepts year and month",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "Requests a financial report on paid services for the month",
+                "operationId": "get-report",
+                "parameters": [
+                    {
+                        "description": "data for get report",
+                        "name": "report_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Report"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/reports/": {
+            "get": {
+                "description": "accepts report key",
+                "tags": [
+                    "order"
+                ],
+                "summary": "Downloads a file with a report in CSV format",
+                "operationId": "download-file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "report key",
+                        "name": "report",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not found",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "post": {
+                "description": "accepts user id, order by data, limit and offset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Requests a list of all user transactions with comments",
+                "operationId": "get-transactions",
+                "parameters": [
+                    {
+                        "description": "data for get transactions",
+                        "name": "transactions_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.TransactionListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TransactionList"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        },
+        "/transfer": {
+            "post": {
+                "description": "accepts sender id, receiver id, amount",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Makes a transfer of funds between two users",
+                "operationId": "transfer-funds",
+                "parameters": [
+                    {
+                        "description": "data for transfer funds",
+                        "name": "transfer_request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Transfer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    },
+                    "500": {
+                        "description": "server error",
+                        "schema": {
+                            "$ref": "#/definitions/app.response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "app.response": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.AccrualFunds": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "models.Order": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "order_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "service_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "models.Report": {
+            "type": "object",
+            "required": [
+                "month",
+                "year"
+            ],
+            "properties": {
+                "month": {
+                    "type": "integer",
+                    "maximum": 12,
+                    "minimum": 1
+                },
+                "year": {
+                    "type": "integer",
+                    "minimum": 2007
+                }
+            }
+        },
+        "models.TransactionList": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.TransactionListRequest": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "order_by": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "models.Transfer": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "receiver_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "sender_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "models.Unblock": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "models.UserBalance": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        }
+    }
+}

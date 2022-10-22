@@ -29,7 +29,7 @@ func NewUserService(repo repository.User) *UserService {
 }
 
 // AccrualFunds - method of accruing cash to the balance
-func (u *UserService) AccrualFunds(ac models.AccrualCash) (code int, err error) {
+func (u *UserService) AccrualFunds(ac models.AccrualFunds) (code int, err error) {
 	if ac.Amount <= 0 {
 		return 400, errAmount
 	}

@@ -1,0 +1,378 @@
+basePath: /
+definitions:
+  app.response:
+    properties:
+      description:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.AccrualFunds:
+    properties:
+      amount:
+        type: number
+      user_id:
+        minimum: 1
+        type: integer
+    type: object
+  models.Order:
+    properties:
+      amount:
+        type: number
+      order_id:
+        minimum: 1
+        type: integer
+      service_id:
+        minimum: 1
+        type: integer
+      user_id:
+        minimum: 1
+        type: integer
+    type: object
+  models.Report:
+    properties:
+      month:
+        maximum: 12
+        minimum: 1
+        type: integer
+      year:
+        minimum: 2007
+        type: integer
+    required:
+    - month
+    - year
+    type: object
+  models.TransactionList:
+    properties:
+      amount:
+        type: number
+      date:
+        type: string
+      message:
+        type: string
+      transaction_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  models.TransactionListRequest:
+    properties:
+      limit:
+        minimum: 0
+        type: integer
+      offset:
+        minimum: 0
+        type: integer
+      order_by:
+        type: string
+      user_id:
+        minimum: 1
+        type: integer
+    type: object
+  models.Transfer:
+    properties:
+      amount:
+        type: number
+      receiver_id:
+        minimum: 1
+        type: integer
+      sender_id:
+        minimum: 1
+        type: integer
+    type: object
+  models.Unblock:
+    properties:
+      order_id:
+        minimum: 1
+        type: integer
+    type: object
+  models.UserBalance:
+    properties:
+      user_id:
+        minimum: 1
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: ssg0808@yandex.ru
+    name: Sergey Gavrilin
+  description: API Server for working with user balance
+  title: Avito-tech
+  version: "1.0"
+paths:
+  /accrual:
+    post:
+      consumes:
+      - application/json
+      description: accepts amount and user ID
+      operationId: accrual-funds
+      parameters:
+      - description: data for accrual
+        in: body
+        name: id_and_amount
+        required: true
+        schema:
+          $ref: '#/definitions/models.AccrualFunds'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Accrues funds to the user's balance
+      tags:
+      - user
+  /cancel_order:
+    post:
+      consumes:
+      - application/json
+      description: accepts order id
+      operationId: unblock-funds
+      parameters:
+      - description: order id for unblock
+        in: body
+        name: unblock_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Unblock'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Unblocks the user's funds when the service is canceled
+      tags:
+      - user
+  /charge:
+    post:
+      consumes:
+      - application/json
+      description: accepts user id, service id, order id, amount
+      operationId: charge-funds
+      parameters:
+      - description: data for charge funds
+        in: body
+        name: charge_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Withdraws previously blocked funds
+      tags:
+      - order
+  /create_order:
+    post:
+      consumes:
+      - application/json
+      description: accepts user id, service id, order id, amount
+      operationId: block-funds
+      parameters:
+      - description: data for order
+        in: body
+        name: block_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Order'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Blocks user funds when ordering a service
+      tags:
+      - user
+  /get_balance:
+    post:
+      consumes:
+      - application/json
+      description: accepts user id
+      operationId: get-balance
+      parameters:
+      - description: user id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserBalance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Returns the user's current balance
+      tags:
+      - user
+  /get_report:
+    post:
+      consumes:
+      - application/json
+      description: accepts year and month
+      operationId: get-report
+      parameters:
+      - description: data for get report
+        in: body
+        name: report_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Report'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Requests a financial report on paid services for the month
+      tags:
+      - order
+  /reports/:
+    get:
+      description: accepts report key
+      operationId: download-file
+      parameters:
+      - description: report key
+        in: query
+        name: report
+        required: true
+        type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            type: string
+        "404":
+          description: not found
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Downloads a file with a report in CSV format
+      tags:
+      - order
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: accepts user id, order by data, limit and offset
+      operationId: get-transactions
+      parameters:
+      - description: data for get transactions
+        in: body
+        name: transactions_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.TransactionListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            items:
+              $ref: '#/definitions/models.TransactionList'
+            type: array
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Requests a list of all user transactions with comments
+      tags:
+      - transaction
+  /transfer:
+    post:
+      consumes:
+      - application/json
+      description: accepts sender id, receiver id, amount
+      operationId: transfer-funds
+      parameters:
+      - description: data for transfer funds
+        in: body
+        name: transfer_request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Transfer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            $ref: '#/definitions/app.response'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/app.response'
+        "500":
+          description: server error
+          schema:
+            $ref: '#/definitions/app.response'
+      summary: Makes a transfer of funds between two users
+      tags:
+      - user
+schemes:
+- http
+swagger: "2.0"

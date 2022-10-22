@@ -1,3 +1,5 @@
+// Package repository is used to initialize and work with the database.
+// Also, this package stores all the abstractions through which work with the database is carried out.
 package repository
 
 import (
@@ -7,7 +9,7 @@ import (
 
 // User - Interface describing the user entity
 type User interface {
-	AccrualFunds(ac models.AccrualCash) error
+	AccrualFunds(ac models.AccrualFunds) error
 	GetBalance(ub *models.UserBalance) (*models.UserBalance, error)
 	BlockFunds(order models.Order) error
 	TransferFunds(t models.Transfer) error

@@ -35,7 +35,7 @@ func NewUserRepo(db *pgxpool.Pool) *UserRepo {
 }
 
 // AccrualFunds - method of accruing cash to the balance
-func (u *UserRepo) AccrualFunds(ac models.AccrualCash) error {
+func (u *UserRepo) AccrualFunds(ac models.AccrualFunds) error {
 	tx, err := u.db.Begin(context.Background())
 	if err != nil {
 		return err
@@ -274,7 +274,7 @@ func (u *UserRepo) addTransaction(t models.Transaction) error {
 }
 
 // addUser - method for inserting a new user with replenished balance
-func (u *UserRepo) addUser(ac models.AccrualCash) error {
+func (u *UserRepo) addUser(ac models.AccrualFunds) error {
 	tx, err := u.db.Begin(context.Background())
 	if err != nil {
 		tx.Rollback(context.Background())

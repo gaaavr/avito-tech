@@ -1,9 +1,10 @@
+// Package models contains all the necessary objects for transferring data and interacting with the application
 package models
 
 import "time"
 
-// AccrualCash - structure for a request to credit funds to a user's balance
-type AccrualCash struct {
+// AccrualFunds - structure for a request to credit funds to a user's balance
+type AccrualFunds struct {
 	UserID  int     `json:"user_id" validate:"gte=1"`
 	Amount  float64 `json:"amount" validate:"gt=0"`
 	Message string

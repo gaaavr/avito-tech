@@ -1,3 +1,4 @@
+// Package logger for logging errors and informing about the operation of the application
 package logger
 
 import (
@@ -10,7 +11,7 @@ type Log struct {
 	*logrus.Entry
 }
 
-// New - constructor function for Log// User - Interface describing the user entity
+// New - constructor function for Log
 func New() *Log {
 	l := logrus.New()
 	l.Formatter = &logrus.TextFormatter{

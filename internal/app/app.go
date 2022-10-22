@@ -1,3 +1,6 @@
+// Package app contains the entire structure of the application, it describes the functions of
+// initializing the application components and its launch. And also this package contains all the handlers
+// that are responsible for working with the request and getting data from it
 package app
 
 import (
@@ -11,7 +14,6 @@ import (
 	"github.com/valyala/fasthttp"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 )
 
@@ -22,21 +24,7 @@ type App struct {
 	services      *service.Service
 	parser        *parser.Parser
 	logger        logger.Logger
-	store         reportStore
-}
-
-// report storage object
-type reportStore struct {
-	sync.RWMutex
-	reports map[string][]byte
-}
-
-// IsExist checks if the report is in the repository
-func (s *reportStore) IsExist(key string) ([]byte, bool) {
-	s.RLock()
-	defer s.RUnlock()
-	data, ok := s.reports[key]
-	return data, ok
+	store         *reportStore
 }
 
 // NewApp - constructor function for App
@@ -52,7 +40,7 @@ func NewApp() *App {
 func (a *App) ParseConfig() {
 	var cfg configs.Common
 	if err := env.Parse(&cfg); err != nil {
-		a.logger.Fatalf("cannot parse config: %s", err)
+		a.logger.Fatalf("cannot parse config: %s", err.Error())
 	}
 	a.config = &cfg
 }
@@ -72,7 +60,7 @@ func InitApi() {
 	storage := reportStore{
 		reports: make(map[string][]byte),
 	}
-	a.store = storage
+	a.store = &storage
 	router := a.Routing()
 	a.defaultServer.Handler = router.Handler
 	a.Run()

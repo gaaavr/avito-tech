@@ -1,4 +1,4 @@
-// This package is used to parse data into json format and validate data.
+// Package parser is used to parse data into json format and validate data.
 package parser
 
 import (

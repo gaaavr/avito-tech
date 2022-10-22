@@ -5,9 +5,13 @@ import (
 	"time"
 )
 
-// LogRequests - middleware that logs all requests
+// LogRequests - middleware that logs all requests and
 func (a *App) LogRequests(h fasthttp.RequestHandler) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
+		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-Secret, Access-Control-Allow-Origin, Access-Control-Allow-Headers, X-CSRF-Token, Authorization-Token")
+		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+		ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		ctx.Response.Header.Set("Content-Type", "*/*; charset=utf-8")
 		start := time.Now()
 		h(ctx)
 		fullURI := string(ctx.Request.URI().Path())
