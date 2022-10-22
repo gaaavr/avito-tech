@@ -77,6 +77,9 @@ func (u *UserService) UnblockFunds(unblock models.Unblock) (code int, err error)
 	}
 	err = u.repo.UnblockFunds(unblock)
 	if err != nil {
+		if err.Error() == errNoRows {
+			return 400, fmt.Errorf("it is not possible to unlock funds for this order")
+		}
 		return 500, fmt.Errorf("database error: %s", err.Error())
 	}
 	return 200, nil

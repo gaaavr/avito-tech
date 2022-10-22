@@ -21,6 +21,7 @@ const (
 
 var (
 	errInsertRow = errors.New("failed to insert data into database")
+	errUpdate    = errors.New("data update error")
 )
 
 // UserRepo - user object in the repository layer
@@ -203,35 +204,28 @@ func (u *UserRepo) UnblockFunds(unblock models.Unblock) error {
 	if err != nil {
 		return err
 	}
-	getAmount := fmt.Sprintf("SELECT %s, %s FROM %s WHERE %s=$1",
-		columnAmount, columnUserId, tableOrders, columnOrderId)
-	row := tx.QueryRow(context.Background(), getAmount, unblock.OrderID)
-	err = row.Scan(&unblock.Amount, &unblock.UserID)
+	updateUserBalance := fmt.Sprintf("UPDATE %s SET %s=%s+%s.%s FROM %s WHERE %s.%s=%s.%s AND %s.%s=$1 AND %s.%s=$2 RETURNING %s.%s, %s.%s",
+		tableUsers, columnBalance, columnBalance, tableOrders, columnAmount, tableOrders, tableUsers,
+		columnUserId, tableOrders, columnUserId, tableOrders, columnOrderId, tableOrders, columnBlock, tableUsers, columnUserId,
+		tableOrders, columnAmount)
+	row := tx.QueryRow(context.Background(), updateUserBalance, unblock.OrderID, true)
+	err = row.Scan(&unblock.UserID, &unblock.Amount)
 	if err != nil {
 		tx.Rollback(context.Background())
 		return err
 	}
-	updateUserBalance := fmt.Sprintf("UPDATE %s SET %s=%s+$1 WHERE %s=$2",
-		tableUsers, columnBalance, columnBalance, columnUserId)
-	result, err := tx.Exec(context.Background(), updateUserBalance, unblock.Amount, unblock.UserID)
+	updateOrderStatus := fmt.Sprintf("UPDATE %s SET %s=$1, %s=$2 WHERE %s=$3",
+		tableOrders, columnAmount, columnBlock, columnOrderId)
+	result, err := tx.Exec(context.Background(), updateOrderStatus, 0, false, unblock.OrderID)
 	if err != nil {
 		tx.Rollback(context.Background())
 		return err
 	}
 	rowsAffected := result.RowsAffected()
-	if rowsAffected == 0 {
+	if rowsAffected != 1 {
 		tx.Rollback(context.Background())
-		return fmt.Errorf("user with id %d does not exist", unblock.UserID)
+		return errUpdate
 	}
-
-	updateOrderStatus := fmt.Sprintf("UPDATE %s SET %s=$1,%s=$2 WHERE %s=$3",
-		tableOrders, columnAmount, columnBlock, columnOrderId)
-	result, err = tx.Exec(context.Background(), updateOrderStatus, 0, false, unblock.OrderID)
-	if err != nil {
-		tx.Rollback(context.Background())
-		return err
-	}
-
 	t := models.Transaction{
 		UserID:  unblock.UserID,
 		Amount:  unblock.Amount,
