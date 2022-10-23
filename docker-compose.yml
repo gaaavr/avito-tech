@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   avito-tech:
-    restart: always
+    restart: on-failure
     build: ./
     depends_on:
       - db
@@ -12,9 +12,11 @@ services:
       - SERVICE_HOST:${SERVICE_HOST}
     ports:
       - 8080:${SERVICE_PORT}
+    networks:
+      - database
 
   db:
-    restart: always
+    restart: on-failure
     image: postgres:latest
     env_file:
       - .env
@@ -30,3 +32,9 @@ services:
       - ./schema/000001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:${DB_PORT}
+    networks:
+      - database
+
+networks:
+  database:
+    driver: bridge
