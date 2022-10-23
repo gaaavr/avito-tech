@@ -1,6 +1,6 @@
 # Running application in docker
 ```
-docker-compose up  avito-tech
+docker-compose up --build avito-tech
 ```
 When the application starts, the necessary tables are immediately created in the database. 
 Table initialization scripts are located in /schema/000001_init.up.sql
