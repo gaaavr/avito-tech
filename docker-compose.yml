@@ -4,8 +4,7 @@ services:
   avito-tech:
     restart: on-failure
     build: ./
-    command: ./wait-for-postgres.sh db ./todo-app
-    depends_on:
+    command: ./wait-for-postgres.sh db ./avito-tech
       - db
     env_file:
       - .env
