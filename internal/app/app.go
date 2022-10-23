@@ -11,6 +11,7 @@ import (
 	"avito/pkg/logger"
 	"fmt"
 	"github.com/caarlos0/env/v6"
+	"github.com/joho/godotenv"
 	"github.com/valyala/fasthttp"
 	"os"
 	"os/signal"
@@ -38,6 +39,9 @@ func NewApp() *App {
 
 // ParseConfig - function for parsing config from env
 func (a *App) ParseConfig() {
+	if err := godotenv.Load(".env"); err != nil {
+		a.logger.Fatalf("cannot load env: %s", err.Error())
+	}
 	var cfg configs.Common
 	if err := env.Parse(&cfg); err != nil {
 		a.logger.Fatalf("cannot parse config: %s", err.Error())
@@ -49,7 +53,6 @@ func (a *App) ParseConfig() {
 func InitApi() {
 	a := NewApp()
 	a.ParseConfig()
-	a.config.DbPassword = "qwerty"
 	repo, err := repository.NewPostgresDB(a.config.ConfigDB)
 	if err != nil {
 		a.logger.Fatalf("init db error: %s", err.Error())
@@ -64,6 +67,7 @@ func InitApi() {
 	router := a.Routing()
 	a.defaultServer.Handler = router.Handler
 	a.Run()
+	repo.Close()
 }
 
 func (a *App) Run() {

@@ -1,3 +1,14 @@
+# Running application in docker
+```
+sudo docker-compose up  avito-tech
+```
+When the application starts, the necessary tables are immediately created in the database. 
+Table initialization scripts are located in /schema/000001_init.up.sql
+# How to use app
+To interact with the application, you can use requests in the postman. 
+To do this, you need to import the avito-tech.postman_collection.json
+
+You can also send requests from the swagger http://localhost:8080/docs/index.html
 # Requests and responses to interact with the application
 ### 1.The method of accruing funds to the balance. URI: /accrual
 * Input example 

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  avito-tech:
+    restart: always
+    build: ./
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - SERVICE_HOST:${SERVICE_HOST}
+    ports:
+      - 8080:${SERVICE_PORT}
+
+  db:
+    restart: always
+    image: postgres:latest
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSLMODE=${DB_SSLMODE}
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+      - ./schema/000001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5432:${DB_PORT}
