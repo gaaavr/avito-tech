@@ -29,7 +29,7 @@ func (a *App) accrualFunds(ctx *fasthttp.RequestCtx) {
 	}
 	statusCode, err := a.services.AccrualFunds(ac)
 	if err != nil {
-		a.logger.Errorf("money transfer error: %s", err.Error())
+		a.logger.Errorf("accrual funds error: %s", err.Error())
 		Response(ctx, statusCode, err.Error(), false)
 		return
 	}
