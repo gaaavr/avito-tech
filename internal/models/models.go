@@ -68,6 +68,6 @@ type TransactionListRequest struct {
 // Unblock - structure for unlocking funds
 type Unblock struct {
 	OrderID int     `json:"order_id" validate:"gte=1"`
-	UserID  int     `json:"user_id" validate:"gte=1"`
+	UserID  int     `json:"user_id"`
 	Amount  float64 `json:"amount"`
 }
