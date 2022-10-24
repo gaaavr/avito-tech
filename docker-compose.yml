@@ -2,9 +2,10 @@ version: '3.8'
 
 services:
   avito-tech:
-    restart: always
+    restart: on-failure
     build: ./
     command: ./wait-for-postgres.sh db ./avito-tech
+    depends_on:
       - db
     env_file:
       - .env
@@ -16,7 +17,7 @@ services:
       - database
 
   db:
-    restart: always
+    restart: on-failure
     image: postgres:latest
     env_file:
       - .env
